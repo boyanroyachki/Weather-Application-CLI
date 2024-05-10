@@ -1,6 +1,7 @@
 use std::io; 
 use serde::Deserialize; 
 use colored::*;
+use chrono::*;
 
 #[derive(Deserialize, Debug)]
 struct WeatherResponse {
@@ -8,6 +9,7 @@ struct WeatherResponse {
     main: Main, 
     wind: Wind,
     name: String, 
+    timezone: i32, // Timezone offset in seconds from UTC
 }
 
 #[derive(Deserialize, Debug)]
@@ -46,13 +48,18 @@ fn display_weather_info(response: &WeatherResponse) {
     let pressure = response.main.pressure;
     let wind_speed = response.wind.speed;
 
+    // Calculate local time using timezone offset
+    let utc_now: DateTime<Utc> = Utc::now();
+    let local_time = utc_now + Duration::seconds(response.timezone.into());
+
     let weather_text = format!(
-"Weather in {}: {} {}
+"Weather in {} at {}: {} {}
 > Temperature: {:.1}°C, 
 > Humidity: {:.1}%, 
 > Pressure: {:.1} hPa, 
 > Wind Speed: {:.1} m/s",
     response.name,
+    local_time.format("%Y-%m-%d %H:%M:%S"), // Formatting the datetime
     description,
     get_temperature_emoji(temperature),
     temperature,
