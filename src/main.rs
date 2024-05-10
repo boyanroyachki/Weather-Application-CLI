@@ -1,7 +1,7 @@
 use std::io; 
 use serde::Deserialize; 
 use colored::*;
-use chrono::*;
+use chrono::{DateTime, Utc, Duration};
 
 #[derive(Deserialize, Debug)]
 struct WeatherResponse {
