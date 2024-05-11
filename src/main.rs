@@ -1,8 +1,18 @@
-use std::io; 
+use std::{io, fs}; 
 use serde::Deserialize; 
 use colored::*;
 use chrono::{DateTime, Utc, Duration};
 
+#[derive(Deserialize)]
+struct Config {
+    api_key: String,
+}
+
+fn read_config() -> Result<Config, Box<dyn std::error::Error>> {
+    let config_str = fs::read_to_string("config.json")?;
+    let config: Config = serde_json::from_str(&config_str)?;
+    Ok(config)
+}
 #[derive(Deserialize, Debug)]
 struct WeatherResponse {
     weather: Vec<Weather>, 
@@ -96,6 +106,14 @@ fn get_temperature_emoji(temperature: f64) -> &'static str {
 fn main() {
     println!("{}", "Welcome to Weather Station!".bright_yellow()); 
 
+    let config = match read_config() {
+        Ok(config) => config,
+        Err(e) => {
+            eprintln!("Error loading configuration: {}", e);
+            return;
+        }
+    };
+
     loop {
         println!("{}", "Please enter the name of the city:".bright_green()); 
 
@@ -108,11 +126,9 @@ fn main() {
         let mut country_code = String::new();
         io::stdin().read_line(&mut country_code).expect("Failed to read input");
         let country_code = country_code.trim();
+ 
 
-        
-        let api_key = "0c216d23ac8057856698a3929cf95767"; 
-
-        match get_weather_info(&city, &country_code, api_key) {
+        match get_weather_info(&city, &country_code, &config.api_key) {
             Ok(response) => {
                 display_weather_info(&response);
             }
