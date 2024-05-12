@@ -34,7 +34,6 @@ struct Main {
     pressure: f64, 
 }
 
-
 #[derive(Deserialize, Debug)]
 struct Wind {
     speed: f64, 
